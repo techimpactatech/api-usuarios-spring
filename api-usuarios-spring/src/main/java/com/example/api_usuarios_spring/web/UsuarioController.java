@@ -22,7 +22,8 @@ public class UsuarioController {
   @ApiResponse(responseCode = "201", description = "Usuário criado",
       content = @Content(mediaType = "application/json",
           schema = @Schema(implementation = UsuarioDTO.class)))
-  @ApiResponse(responseCode = "409", description = "E-mail já cadastrado")
+  @ApiResponse(responseCode = "400", ref = "#/components/responses/BadRequestProblem")
+  @ApiResponse(responseCode = "409", ref = "#/components/responses/ConflictProblem")
   @PostMapping
   public ResponseEntity<UsuarioDTO> criar(@Valid @RequestBody Usuario body) {
     var salvo = service.criar(body);
@@ -40,7 +41,7 @@ public class UsuarioController {
 
   @Operation(summary = "Obter usuário por ID")
   @ApiResponse(responseCode = "200", description = "Usuário encontrado")
-  @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
+  @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFoundProblem")
   @GetMapping("/{id}")
   public UsuarioDTO obter(@PathVariable Long id) {
     return UsuarioDTO.of(service.buscar(id));
@@ -48,8 +49,8 @@ public class UsuarioController {
 
   @Operation(summary = "Atualizar usuário por ID")
   @ApiResponse(responseCode = "200", description = "Usuário atualizado")
-  @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
-  @ApiResponse(responseCode = "409", description = "E-mail já cadastrado")
+  @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFoundProblem")
+  @ApiResponse(responseCode = "409", ref = "#/components/responses/ConflictProblem")
   @PutMapping("/{id}")
   public UsuarioDTO atualizar(@PathVariable Long id, @Valid @RequestBody Usuario body) {
     return UsuarioDTO.of(service.atualizar(id, body));
@@ -57,7 +58,7 @@ public class UsuarioController {
 
   @Operation(summary = "Remover usuário por ID")
   @ApiResponse(responseCode = "204", description = "Removido com sucesso")
-  @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
+  @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFoundProblem")
   @DeleteMapping("/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void remover(@PathVariable Long id) {

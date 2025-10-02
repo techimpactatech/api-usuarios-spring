@@ -6,10 +6,10 @@ import java.time.Instant;
 
 @Schema(name = "Usuario")
 public record UsuarioDTO(
-  @Schema(example = "1") Long id,
+  @Schema(accessMode = Schema.AccessMode.READ_ONLY, example = "1") Long id,
   @Schema(example = "Ana Silva") String nome,
   @Schema(example = "ana@exemplo.com") String email,
-  @Schema(example = "2025-10-02T23:59:59Z") Instant criadoEm
+  @Schema(accessMode = Schema.AccessMode.READ_ONLY, example = "2025-10-02T23:59:59Z") Instant criadoEm
 ) {
   public static UsuarioDTO of(Usuario u) {
     return new UsuarioDTO(u.getId(), u.getNome(), u.getEmail(), u.getCriadoEm());
