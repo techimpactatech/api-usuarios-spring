@@ -4,10 +4,12 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.media.Content;
-import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.media.MediaType;
-import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.ObjectSchema;
+import io.swagger.v3.oas.models.media.StringSchema;
+import io.swagger.v3.oas.models.media.IntegerSchema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.examples.Example;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -16,14 +18,20 @@ public class OpenApiConfig {
 
   @Bean
   public OpenAPI apiUsuariosOpenAPI() {
-    // Reaproveita o schema nativo do Spring para ProblemDetail
-    Schema<?> problemSchemaRef = new Schema<>().$ref("#/components/schemas/ProblemDetail");
+    // ---- Schema inline (sem $ref) para problem+json ----
+    var problemSchemaInline = new ObjectSchema()
+        .addProperty("type",    new StringSchema().example("about:blank"))
+        .addProperty("title",   new StringSchema().example("Recurso não encontrado"))
+        .addProperty("status",  new IntegerSchema().format("int32").example(404))
+        .addProperty("detail",  new StringSchema().example("Usuário não encontrado"))
+        .addProperty("instance",new StringSchema().example("/usuarios/123"));
 
-    // MediaType problem+json com exemplos
+    // 400
     MediaType badRequestMt = new MediaType()
-        .schema(problemSchemaRef)
+        .schema(problemSchemaInline)
         .addExamples("example", new Example().value("""
           {
+            "type": "https://http.dev/problems/invalid-request",
             "title": "Requisição inválida",
             "status": 400,
             "detail": "Dados inválidos",
@@ -34,38 +42,40 @@ public class OpenApiConfig {
           }
         """));
 
+    // 404
     MediaType notFoundMt = new MediaType()
-        .schema(problemSchemaRef)
+        .schema(problemSchemaInline)
         .addExamples("example", new Example().value("""
           {
+            "type": "about:blank",
             "title": "Recurso não encontrado",
             "status": 404,
             "detail": "Usuário não encontrado"
           }
         """));
 
+    // 409
     MediaType conflictMt = new MediaType()
-        .schema(problemSchemaRef)
+        .schema(problemSchemaInline)
         .addExamples("example", new Example().value("""
           {
+            "type": "about:blank",
             "title": "Conflito",
             "status": 409,
             "detail": "email já cadastrado"
           }
         """));
 
-    // Conteúdos por status
-    Content badRequestContent = new Content().addMediaType("application/problem+json", badRequestMt);
-    Content notFoundContent  = new Content().addMediaType("application/problem+json", notFoundMt);
-    Content conflictContent  = new Content().addMediaType("application/problem+json", conflictMt);
-
     Components components = new Components()
         .addResponses("BadRequestProblem",
-            new ApiResponse().description("Dados inválidos").content(badRequestContent))
+            new ApiResponse().description("Dados inválidos")
+                .content(new Content().addMediaType("application/problem+json", badRequestMt)))
         .addResponses("NotFoundProblem",
-            new ApiResponse().description("Recurso não encontrado").content(notFoundContent))
+            new ApiResponse().description("Recurso não encontrado")
+                .content(new Content().addMediaType("application/problem+json", notFoundMt)))
         .addResponses("ConflictProblem",
-            new ApiResponse().description("Conflito").content(conflictContent));
+            new ApiResponse().description("Conflito")
+                .content(new Content().addMediaType("application/problem+json", conflictMt)));
 
     return new OpenAPI()
         .info(new Info()
