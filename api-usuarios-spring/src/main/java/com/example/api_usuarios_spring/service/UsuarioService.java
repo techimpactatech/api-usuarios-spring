@@ -10,23 +10,27 @@ import java.util.List;
 
 @Service
 public class UsuarioService {
+
   private final UsuarioRepository repo;
+
   public UsuarioService(UsuarioRepository repo) { this.repo = repo; }
 
   public Usuario criar(Usuario u) {
     repo.findByEmail(u.getEmail()).ifPresent(x -> {
       throw new ResponseStatusException(HttpStatus.CONFLICT, "email já cadastrado");
     });
+    u.setId(null); // deixa o banco gerar
     return repo.save(u);
   }
 
-  public List<Usuario> listar(int page, int size) { return repo.findAll(page, size); }
+  public List<Usuario> listarTodos() { return repo.findAll(); }
 
-  public Usuario buscar(Long id) {
-    return repo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+  public Usuario buscar(Integer id) {
+    return repo.findById(id)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
   }
 
-  public Usuario atualizar(Long id, Usuario dados) {
+  public Usuario atualizar(Integer id, Usuario dados) {
     var existente = buscar(id);
     if (!existente.getEmail().equalsIgnoreCase(dados.getEmail())) {
       repo.findByEmail(dados.getEmail()).ifPresent(x -> {
@@ -38,5 +42,5 @@ public class UsuarioService {
     return repo.save(existente);
   }
 
-  public void remover(Long id) { buscar(id); repo.deleteById(id); }
+  public void remover(Integer id) { repo.delete(buscar(id)); }
 }

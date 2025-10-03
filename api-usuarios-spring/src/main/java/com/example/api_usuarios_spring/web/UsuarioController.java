@@ -36,14 +36,14 @@ public class UsuarioController {
   public List<UsuarioDTO> listar(
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "20") int size) {
-    return service.listar(page, size).stream().map(UsuarioDTO::of).toList();
+    return service.listarTodos().stream().map(UsuarioDTO::of).toList();
   }
 
   @Operation(summary = "Obter usuário por ID")
   @ApiResponse(responseCode = "200", description = "Usuário encontrado")
   @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFoundProblem")
   @GetMapping("/{id}")
-  public UsuarioDTO obter(@PathVariable Long id) {
+  public UsuarioDTO obter(@PathVariable Integer id) {
     return UsuarioDTO.of(service.buscar(id));
   }
 
@@ -52,7 +52,7 @@ public class UsuarioController {
   @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFoundProblem")
   @ApiResponse(responseCode = "409", ref = "#/components/responses/ConflictProblem")
   @PutMapping("/{id}")
-  public UsuarioDTO atualizar(@PathVariable Long id, @Valid @RequestBody Usuario body) {
+  public UsuarioDTO atualizar(@PathVariable Integer id, @Valid @RequestBody Usuario body) {
     return UsuarioDTO.of(service.atualizar(id, body));
   }
 
@@ -61,7 +61,7 @@ public class UsuarioController {
   @ApiResponse(responseCode = "404", ref = "#/components/responses/NotFoundProblem")
   @DeleteMapping("/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void remover(@PathVariable Long id) {
+  public void remover(@PathVariable Integer id) {
     service.remover(id);
   }
 }
