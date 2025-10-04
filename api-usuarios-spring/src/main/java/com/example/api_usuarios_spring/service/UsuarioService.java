@@ -7,14 +7,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Service
 public class UsuarioService {
+    private final UsuarioRepository repo;
 
-  private final UsuarioRepository repo;
+    public UsuarioService(UsuarioRepository repo) { this.repo = repo; }
 
-  public UsuarioService(UsuarioRepository repo) { this.repo = repo; }
-
+    public Page<Usuario> listar(Pageable pageable) {
+        return repo.findAll(pageable);
+    }
   public Usuario criar(Usuario u) {
     repo.findByEmail(u.getEmail()).ifPresent(x -> {
       throw new ResponseStatusException(HttpStatus.CONFLICT, "email já cadastrado");

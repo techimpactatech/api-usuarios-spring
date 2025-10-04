@@ -3,12 +3,18 @@ package com.example.api_usuarios_spring.web;
 import com.example.api_usuarios_spring.domain.Usuario;
 import com.example.api_usuarios_spring.service.UsuarioService;
 import com.example.api_usuarios_spring.web.dto.UsuarioDTO;
+import com.example.api_usuarios_spring.web.dto.UsuariosPageResponse;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.*;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
+
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -30,14 +36,33 @@ public class UsuarioController {
     return ResponseEntity.status(HttpStatus.CREATED).body(UsuarioDTO.of(salvo));
   }
 
-  @Operation(summary = "Listar usuários")
-  @ApiResponse(responseCode = "200", description = "Lista de usuários")
-  @GetMapping
-  public List<UsuarioDTO> listar(
-      @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "20") int size) {
-    return service.listarTodos().stream().map(UsuarioDTO::of).toList();
-  }
+  @Operation(
+        summary = "Listar usuários (paginado)",
+        description = "Retorna usuários com paginação.",
+        parameters = {
+            @Parameter(name = "page", description = "Número da página (0-based)", schema = @Schema(type="integer", defaultValue = "0")),
+            @Parameter(name = "size", description = "Tamanho da página", schema = @Schema(type="integer", defaultValue = "20"))
+        }
+    )
+    @ApiResponse(responseCode = "200", description = "Página de usuários",
+        content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+            schema = @Schema(implementation = UsuariosPageResponse.class)))
+    @GetMapping
+    public UsuariosPageResponse listar(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+
+        Page<Usuario> p = service.listar(PageRequest.of(page, size));
+        List<UsuarioDTO> content = p.getContent().stream().map(UsuarioDTO::of).toList();
+
+        return new UsuariosPageResponse(
+                content,
+                p.getNumber(),
+                p.getSize(),
+                p.getTotalElements(),
+                p.getTotalPages()
+        );
+    }
 
   @Operation(summary = "Obter usuário por ID")
   @ApiResponse(responseCode = "200", description = "Usuário encontrado")
