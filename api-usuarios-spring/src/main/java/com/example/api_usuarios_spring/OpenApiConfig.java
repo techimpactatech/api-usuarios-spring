@@ -31,7 +31,6 @@ public class OpenApiConfig {
         .schema(problemSchemaInline)
         .addExamples("example", new Example().value("""
           {
-            "type": "https://http.dev/problems/invalid-request",
             "title": "Requisição inválida",
             "status": 400,
             "detail": "Dados inválidos",
@@ -47,7 +46,6 @@ public class OpenApiConfig {
         .schema(problemSchemaInline)
         .addExamples("example", new Example().value("""
           {
-            "type": "about:blank",
             "title": "Recurso não encontrado",
             "status": 404,
             "detail": "Usuário não encontrado"
@@ -59,7 +57,6 @@ public class OpenApiConfig {
         .schema(problemSchemaInline)
         .addExamples("example", new Example().value("""
           {
-            "type": "about:blank",
             "title": "Conflito",
             "status": 409,
             "detail": "email já cadastrado"
