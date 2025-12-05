@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
-@Table(name = "users")
+@Table(name = "usuarios")
 public class Usuario {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY) // usa BIGSERIAL no Postgres
